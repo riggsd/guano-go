@@ -108,13 +108,14 @@ func ReadFile(f *os.File) (*Guano, error) {
 			}
 			return nil, err
 		}
-		data := make([]byte, chunk.Size)
-		n, err := f.Read(data) // FIXME: word align
+		size := int(chunk.Size + (chunk.Size & 0x01)) // align to even boundary
+		data := make([]byte, size)
+		n, err := f.Read(data)
 		if err != nil && err != io.EOF {
 			return nil, err
 		}
-		if n != int(chunk.Size) {
-			return nil, fmt.Errorf("expected %d bytes, read %d", chunk.Size, n) // FIXME: word align
+		if n != size {
+			return nil, fmt.Errorf("expected %d bytes, read %d", size, n)
 		}
 		//log.Printf("%v\n", chunk) // DEBUG
 
